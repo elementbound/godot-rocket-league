@@ -1,12 +1,13 @@
 extends Node
-
 class_name PhysicsDriver
 
 # Physics driver based on netfox ticks
 # Step physics in time with netfox and participates in rollback
 
 var physics_space: RID
-var snapshots: Dictionary = {}
+var snapshots := _HistoryBuffer.new(NetworkRollback.history_limit)
+
+static var _logger := NetfoxLogger._for_extras("PhysicsDriver3D")
 
 # Number of physics steps to take per network tick
 @export var physics_factor: int = 2
@@ -16,7 +17,6 @@ var snapshots: Dictionary = {}
 func _enter_tree():
 	#regular ticks
 	NetworkTime.before_tick.connect(before_tick)
-	NetworkTime.after_tick_loop.connect(after_tick_loop)
 
 	#rollback ticks
 	if rollback_physics_space:
@@ -25,7 +25,6 @@ func _enter_tree():
 
 func _exit_tree():
 	NetworkTime.before_tick.disconnect(before_tick)
-	NetworkTime.after_tick_loop.disconnect(after_tick_loop)
 
 	#rollback ticks
 	if NetworkRollback.on_prepare_tick.is_connected(on_prepare_tick):
@@ -50,14 +49,9 @@ func on_prepare_tick(tick: int) -> void:
 
 func on_process_tick(_tick: int) -> void:
 	step_physics(NetworkTime.ticktime)
-		
-func after_tick_loop() -> void:
-	# Remove old snapshots
-	for i in snapshots.keys():
-		if i < NetworkRollback.history_start:
-			snapshots.erase(i)
 
 func step_physics(_delta: float) -> void:
+	_logger.debug("Advancing physics space by %.2fms in %d steps", [_delta * 1000., physics_factor])
 	# Break up physics into smaller steps if needed
 	var frac_delta = _delta / physics_factor
 	var rollback_participants = get_tree().get_nodes_in_group("network_rigid_body")

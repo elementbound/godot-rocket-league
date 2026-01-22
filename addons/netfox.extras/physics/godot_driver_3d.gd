@@ -18,7 +18,7 @@ func _init_physics_space() -> void:
 func _physics_step(delta) -> void:
 	PhysicsServer3D.space_flush_queries(physics_space)
 	PhysicsServer3D.space_step(physics_space, delta)
-	
+
 func _snapshot_space(tick: int) -> void:
 	# Maps RIDs to physics state ( Array )
 	var rid_states := {}
@@ -26,14 +26,16 @@ func _snapshot_space(tick: int) -> void:
 		var rid = element.get_rid()
 		rid_states[rid] = get_body_states(rid)
 
-	snapshots[tick] = rid_states
+	snapshots.set_at(tick, rid_states)
+	_logger.debug("Physics snapshot saved @%d: %s", [tick, rid_states])
 
 func _rollback_space(tick) -> void:
-	if snapshots.has(tick):
-		var rid_states = snapshots[tick]
+	_logger.debug("Restoring physics snapshot @%d", [tick])
+	if snapshots.has_at(tick):
+		var rid_states = snapshots.get_at(tick)
 		for rid in rid_states.keys():
 			set_body_states(rid, rid_states[rid])
-		
+
 		for body in scene_collision_objects:
 			if body is CharacterBody3D or body is AnimatableBody3D:
 				body.force_update_transform()
