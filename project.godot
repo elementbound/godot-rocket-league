@@ -26,10 +26,15 @@ NetworkRollback="*res://addons/netfox/rollback/network-rollback.gd"
 NetworkEvents="*res://addons/netfox/network-events.gd"
 NetworkPerformance="*res://addons/netfox/network-performance.gd"
 NetworkSimulator="*res://addons/netfox.extras/network-simulator.gd"
+RollbackSimulationServer="*res://addons/netfox/servers/rollback-simulation-server.gd"
+NetworkHistoryServer="*res://addons/netfox/servers/network-history-server.gd"
+NetworkSynchronizationServer="*res://addons/netfox/servers/network-synchronization-server.gd"
+NetworkIdentityServer="*res://addons/netfox/servers/network-identity-server.gd"
+NetworkCommandServer="*res://addons/netfox/servers/network-command-server.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/netfox.extras/plugin.cfg", "res://addons/netfox.internals/plugin.cfg", "res://addons/netfox/plugin.cfg")
+enabled=PackedStringArray("res://addons/netfox.extras/plugin.cfg", "res://addons/netfox.internals/plugin.cfg", "res://addons/netfox.noray/plugin.cfg", "res://addons/netfox/plugin.cfg")
 
 [global_group]
 
