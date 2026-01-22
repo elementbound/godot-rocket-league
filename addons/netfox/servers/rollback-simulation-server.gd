@@ -48,10 +48,11 @@ func deregister_input(node: Node, input: Node) -> void:
 	_input_graph.unlink(input, node)
 
 func get_nodes_to_simulate(input_snapshot: Snapshot) -> Array[Node]:
-	var result: Array[Node] = []
-	var tick := input_snapshot.tick
 	if not input_snapshot:
 		return []
+
+	var result: Array[Node] = []
+	var tick := input_snapshot.tick
 
 	for node in _callbacks.keys():
 		var inputs := [] as Array[Node]

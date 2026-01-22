@@ -304,7 +304,7 @@ func _ready():
 		NetworkHistoryServer.record_input(tick + input_delay)
 		NetworkSynchronizationServer.synchronize_input(tick + input_delay)
 	)
-	
+
 	NetworkSynchronizationServer.on_input.connect(func(snapshot: Snapshot):
 		if snapshot.is_empty():
 			return
@@ -314,7 +314,7 @@ func _ready():
 		else:
 			_logger.trace("Ingested input @%d, earliest @%d->@%d", [snapshot.tick, _earliest_input, _earliest_input])
 	)
-	
+
 	NetworkSynchronizationServer.on_state.connect(func(snapshot: Snapshot):
 		if snapshot.is_empty():
 			return
@@ -384,9 +384,9 @@ func _rollback() -> void:
 		#	Done individually by Rewindables ( usually Rollback Synchronizers )
 		#	Restore input and state for tick
 		_rollback_stage = _STAGE_PREPARE
+		on_prepare_tick.emit(tick)
 		NetworkHistoryServer.restore_rollback_input(tick)
 		NetworkHistoryServer.restore_rollback_state(tick)
-		on_prepare_tick.emit(tick)
 		after_prepare_tick.emit(tick)
 
 		# Simulate rollback tick

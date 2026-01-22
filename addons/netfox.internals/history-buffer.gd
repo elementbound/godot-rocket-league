@@ -15,7 +15,7 @@ static func of(capacity: int, data: Dictionary) -> _HistoryBuffer:
 		history_buffer.set_at(idx, data[idx])
 	return history_buffer
 
-func _init(capacity: int = 64):
+func _init(capacity: int):
 	_capacity = capacity
 	_buffer.resize(_capacity)
 	_previous.resize(_capacity)
