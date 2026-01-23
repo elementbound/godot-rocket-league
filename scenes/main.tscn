@@ -40,6 +40,7 @@ script = ExtResource("1_tefeu")
 
 [node name="PhysicsDriver3D" type="Node" parent="."]
 script = ExtResource("2_tefeu")
+physics_factor = 4
 metadata/_custom_type_script = "uid://wr5ur5dqrkni"
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]

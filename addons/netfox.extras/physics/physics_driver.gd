@@ -20,7 +20,9 @@ func _enter_tree():
 
 	#rollback ticks
 	if rollback_physics_space:
-		NetworkRollback.on_prepare_tick.connect(on_prepare_tick)
+		NetworkRollback.on_prepare_tick.connect(func(tick: int): _rollback_space(tick))
+		NetworkRollback.on_record_tick.connect(func(tick: int): _snapshot_space(tick))
+		#NetworkRollback.on_prepare_tick.connect(on_prepare_tick)
 	NetworkRollback.on_process_tick.connect(on_process_tick)
 
 func _exit_tree():
