@@ -68,9 +68,9 @@ func _process(_delta: float) -> void:
 func take_kickoff_position() -> void:
 	if game.kickoff_positions.has(name):
 		direct_state.transform.origin = game.kickoff_positions[name]
-		direct_state.transform.basis = Basis.IDENTITY 
+		direct_state.transform.basis = Basis.IDENTITY
 		direct_state.linear_velocity = Vector3.ZERO
-		direct_state.angular_velocity = Vector3.ZERO 
+		direct_state.angular_velocity = Vector3.ZERO
 
 
 		var target = Vector3(0, global_position.y, 0)
@@ -90,14 +90,14 @@ func _physics_rollback_tick(delta, _tick):
 	steering_input = - clamp(inputs.motion.x, -1, 1)
 
 	var steering_rotation = steering_input * steering_angle
-	
+
 	var fl_wheel = $Wheels/FL_Wheel
 	var fr_wheel = $Wheels/FR_Wheel
-	
+
 	if steering_rotation != 0:
 		var angle = clamp(fl_wheel.rotation.y + steering_rotation, -steering_angle, steering_angle)
 		var new_rotation = angle * delta
-		
+
 		fl_wheel.rotation.y = lerp(fl_wheel.rotation.y, new_rotation, 0.3)
 		fr_wheel.rotation.y = lerp(fr_wheel.rotation.y, new_rotation, 0.3)
 	else:
