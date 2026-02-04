@@ -563,9 +563,9 @@ func _loop() -> void:
 
 		on_tick.emit(ticktime, tick)
 
-		after_tick.emit(ticktime, tick)
 		NetworkHistoryServer.record_sync_state(tick + 1)
 		NetworkSynchronizationServer.synchronize_sync_state(tick + 1)
+		after_tick.emit(ticktime, tick)
 
 		_tick += 1
 		ticks_in_loop += 1
