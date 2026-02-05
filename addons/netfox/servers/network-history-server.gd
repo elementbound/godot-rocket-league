@@ -45,10 +45,18 @@ func record_input(tick: int) -> void:
 func record_state(tick: int) -> void:
 	var input_snapshot := get_rollback_input_snapshot(tick - 1)
 	_record(tick, _rb_state_snapshots, _rb_state_properties, false, func(subject: Node):
+		# In server authority mode, server always has authority and broadcasts everything
+		if subject.multiplayer.is_server():
+			return true
+
+		# Clients only record as authoritative if they own the node
 		if not subject.is_multiplayer_authority():
 			return false
+
+		# Clients don't record predictions as authoritative (server will correct them)
 		if RollbackSimulationServer.is_predicting(input_snapshot, subject):
 			return false
+
 		return true
 	)
 

@@ -78,6 +78,7 @@ func take_kickoff_position() -> void:
 
 func _physics_rollback_tick(delta, _tick):
 
+
 	# Jolt bug workaround - likely https://github.com/godotengine/godot/issues/108656
 	# didnt happen in Godot 4.4
 	sleeping = false
