@@ -33,14 +33,14 @@ func update_scoreboard() -> void:
 
 	score_board.text = "[outline_size=5][outline_color=black][color=red]%d[/color] - [color=blue]%d[/color][/outline_color][/outline_size]" % [scores[0], scores[1]]
 
-	count_down.text = ""	
+	count_down.text = ""
 	if kicking_off:
 		count_down.text = "[outline_size=10][outline_color=black]%d[/outline_color][/outline_size]" % max(0, NetworkTime.ticks_to_seconds(kickoff_tick - NetworkTime.tick))
 
 func queue_kickoff() -> void:
 	if not multiplayer.is_server():
 		return
-		
+
 	await get_tree().create_timer(3.0).timeout
 	kicking_off = true
 	kickoff_tick = NetworkTime.tick + NetworkTime.seconds_to_ticks(3.5)
@@ -51,12 +51,12 @@ func player_joined(_peer : int) -> void:
 	assign_kickoff_positions()
 
 func assign_kickoff_positions() -> void:
-	
+
 	if not multiplayer.is_server():
 		return
-	
+
 	var players = get_tree().get_nodes_in_group("players")
-	
+
 	kickoff_positions.clear()
 	var red_index = 1
 	var blue_index = 1
@@ -67,5 +67,3 @@ func assign_kickoff_positions() -> void:
 		else:
 			kickoff_positions[player.name] = markers.get_node("b%d" % blue_index).global_position
 			blue_index += 1
-
-	

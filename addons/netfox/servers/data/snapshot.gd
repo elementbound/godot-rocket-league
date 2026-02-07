@@ -42,8 +42,8 @@ static func of(tick: int, entries: Array[Array], auth_subjects: Array[Object]) -
 func _init(p_tick: int):
 	tick = p_tick
 
-func duplicate() -> Snapshot:
-	var result := Snapshot.new(tick)
+func duplicate(as_tick: int = tick) -> Snapshot:
+	var result := Snapshot.new(as_tick)
 	result._data = _data.duplicate(true)
 	result._auth_subjects = _auth_subjects.duplicate()
 	return result

@@ -38,7 +38,7 @@ func deregister(node: Node) -> void:
 	_sync_state_properties.erase_subject(node)
 
 func record_input(tick: int) -> void:
-	_record(tick, _rb_input_snapshots, _rb_input_properties, false, func(subject: Node):
+	_record(tick, _rb_input_snapshots, _rb_input_properties, true, func(subject: Node):
 		return subject.is_multiplayer_authority()
 	)
 
@@ -46,8 +46,8 @@ func record_state(tick: int) -> void:
 	var input_snapshot := get_rollback_input_snapshot(tick - 1)
 	_record(tick, _rb_state_snapshots, _rb_state_properties, false, func(subject: Node):
 		# In server authority mode, server always has authority and broadcasts everything
-		if subject.multiplayer.is_server():
-			return true
+		#if subject.multiplayer.is_server():
+			#return true
 
 		# Clients only record as authoritative if they own the node
 		if not subject.is_multiplayer_authority():
@@ -125,12 +125,15 @@ func _record(tick: int, snapshots: _HistoryBuffer, property_pool: _PropertyPool,
 		snapshot.set_auth(subject, is_auth)
 
 	match snapshots:
-		_rb_input_snapshots:
-			_logger.debug("Updates to%s input @%d: %s" % [" new" if is_new else "", tick, updates])
-			_logger.debug("Recorded input @%d: %s", [tick, snapshot])
+		#_rb_input_snapshots:
+			#_logger.debug("Updates to%s input @%d: %s" % [" new" if is_new else "", tick, updates])
+			#_logger.debug("Recorded input @%d: %s", [tick, snapshot])
 		_rb_state_snapshots:
 			_logger.debug("Updates to%s state @%d: %s" % [" new" if is_new else "", tick, updates])
 			_logger.debug("Recorded state @%d: %s", [tick, snapshot])
+		#_sync_state_snapshots:
+			#_logger.debug("Updates to%s sync state @%d: %s" % [" new" if is_new else "", tick, updates])
+			#_logger.debug("Recorded sync state @%d: %s", [tick, snapshot])
 
 func _restore(tick: int, snapshots: _HistoryBuffer) -> bool:
 	if not snapshots.has_latest_at(tick):
@@ -140,17 +143,26 @@ func _restore(tick: int, snapshots: _HistoryBuffer) -> bool:
 	snapshot.apply()
 
 	match snapshots:
-		_rb_input_snapshots: _logger.debug("Restored input @%d: %s", [tick, snapshot])
+		#_rb_input_snapshots: _logger.debug("Restored input @%d: %s", [tick, snapshot])
 		_rb_state_snapshots: _logger.debug("Restored state @%d: %s", [tick, snapshot])
+		#_sync_state_snapshots: _logger.debug("Restored sync state @%d: %s", [tick, snapshot])
 
 	return true
 
 func _merge(snapshot: Snapshot, snapshots: _HistoryBuffer, reverse: bool = false) -> bool:
 	var tick := snapshot.tick
 
-	if not snapshots.has_at(snapshot.tick):
+	if not snapshots.has_latest_at(tick):
+		# No data even remotely close for tick
+		# Store tick if we can, keep it as-is
 		snapshots.set_at(tick, snapshot)
 		return true
+
+	if not snapshots.has_at(tick):
+		# We don't have data at the exact tick, but we a snapshot from earlier
+		# Copy that snapshot and use it as basis
+		var latest_snapshot := snapshots.get_latest_at(tick) as Snapshot
+		snapshots.set_at(tick, latest_snapshot.duplicate())
 
 	var original_snapshot := snapshots.get_at(tick) as Snapshot
 	if reverse:

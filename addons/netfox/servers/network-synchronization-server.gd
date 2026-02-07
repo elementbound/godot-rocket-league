@@ -295,7 +295,7 @@ func _handle_input(sender: int, data: PackedByteArray):
 		snapshot.sanitize(sender)
 
 		if NetworkHistoryServer.merge_rollback_input(snapshot):
-			_logger.debug("Ingested input: %s", [snapshot])
+			#_logger.debug("Ingested input: %s", [snapshot])
 			on_input.emit(snapshot)
 
 func _handle_full_state(sender: int, data: PackedByteArray):
@@ -337,7 +337,6 @@ func _handle_diff_sync(sender: int, data: PackedByteArray):
 
 func _ingest_state(sender: int, snapshot: Snapshot) -> void:
 	snapshot.sanitize(sender)
-#	_logger.debug("Received state snapshot: %s", [snapshot])
 
 	NetworkHistoryServer.merge_rollback_state(snapshot)
 	_logger.debug("Ingested state: %s", [snapshot])

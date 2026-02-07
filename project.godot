@@ -85,6 +85,8 @@ jump={
 extras/auto_tile_windows=true
 extras/borderless=true
 extras/screen=1
+rollback/enable_diff_states=false
+state_synchronizer/enable_diff_states=false
 
 [physics]
 
