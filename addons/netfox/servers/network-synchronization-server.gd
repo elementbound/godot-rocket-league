@@ -159,7 +159,7 @@ func synchronize_state(tick: int) -> void:
 	if snapshot.is_empty():
 		# Nothing to send
 		return
-
+	
 	# Figure out whether to send full- or diff state
 	var is_full := _rb_full_scheduler.is_now()
 	if not _rb_enable_diffs:
@@ -294,8 +294,8 @@ func _handle_input(sender: int, data: PackedByteArray):
 	for snapshot in snapshots:
 		snapshot.sanitize(sender)
 
+		_logger.debug("Ingesting input: %s", [snapshot])
 		if NetworkHistoryServer.merge_rollback_input(snapshot):
-			#_logger.debug("Ingested input: %s", [snapshot])
 			on_input.emit(snapshot)
 
 func _handle_full_state(sender: int, data: PackedByteArray):
@@ -303,7 +303,7 @@ func _handle_full_state(sender: int, data: PackedByteArray):
 	buffer.data_array = data
 
 	var snapshot := _dense_serializer.read_from(sender, _rb_state_properties, buffer, true)
-
+	
 	_ingest_state(sender, snapshot)
 
 func _handle_diff_state(sender: int, data: PackedByteArray):
@@ -337,6 +337,7 @@ func _handle_diff_sync(sender: int, data: PackedByteArray):
 
 func _ingest_state(sender: int, snapshot: Snapshot) -> void:
 	snapshot.sanitize(sender)
+#	_logger.debug("Received state snapshot: %s", [snapshot])
 
 	NetworkHistoryServer.merge_rollback_state(snapshot)
 	_logger.debug("Ingested state: %s", [snapshot])
