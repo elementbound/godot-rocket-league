@@ -55,14 +55,14 @@ func record_input(tick: int) -> void:
 
 func record_state(tick: int) -> void:
 	var input_snapshot := get_rollback_input_snapshot(tick - 1)
-	_record(tick, _rb_state_snapshots, _rb_state_properties, false, func(subject: Node):
+	_record(tick, _rb_state_snapshots, _rb_state_properties, true, func(subject: Node):
 		if not subject.is_multiplayer_authority():
 			return false
 		if RollbackSimulationServer.is_predicting(input_snapshot, subject):
 			return false
 		return true
 	)
-	_record_history(tick, _rb_state_history, _rb_state_properties, false, func(subject: Node):
+	_record_history(tick, _rb_state_history, _rb_state_properties, true, func(subject: Node):
 		if not subject.is_multiplayer_authority():
 			return false
 		if RollbackSimulationServer.is_predicting(input_snapshot, subject):
@@ -212,30 +212,42 @@ func _merge_uh_please(snapshot: Snapshot, history: _PerObjectHistory, reverse: b
 		# TODO: Warn?
 		return false
 
+	_logger.debug("Merging snapshot: %s", [snapshot])
+	_logger.debug("Subjects: %s", [snapshot.get_subjects()])
 	for subject in snapshot.get_subjects():
+		_logger.debug("Ensuring snapshot for %s for @%d", [subject, tick])
 		var object_snapshot := history.ensure_snapshot(tick, subject, not reverse) # TODO: Check if carry-forward is valid here
+		if not object_snapshot:
+			_logger.error("fucking snapshot missing")
+			continue
+		_logger.debug("Using snapshot %s", [object_snapshot])
 
 		# Never overwrite auth data
+		_logger.debug("Local auth: %s; Remote auth: %s", [object_snapshot.is_auth(), snapshot.is_auth(subject)])
 		if object_snapshot.is_auth() and not snapshot.is_auth(subject):
+			_logger.debug("Skipping snapshot, won't overwrite auth")
 			continue
 
 		for property in snapshot.get_subject_properties(subject):
 			# If merging in reverse, don't update anything that we already have
 			# a value for - only accept previously unknown property values
 			if reverse and object_snapshot.has_value(property):
-				_logger.debug(
-					"Rejecting incoming %s:%s=%s for reverse merge, already have %s locally: %s",
-					[subject, property, snapshot.get_property(subject, property), object_snapshot.get_value(property), object_snapshot]
-				)
+				if snapshot.get_property(subject, property) != object_snapshot.get_value(property):
+					_logger.debug(
+						"Rejecting incoming %s:%s=%s for reverse merge, already have %s locally: %s",
+						[subject, property, snapshot.get_property(subject, property), object_snapshot.get_value(property), object_snapshot]
+					)
 				continue
 
 			var original_value := object_snapshot.get_value(property)
 			var new_value := snapshot.get_property(subject, property)
 
 			object_snapshot.set_value(property, new_value)
+			_logger.debug("Changed %s:%s - %s -> %s", [subject, property, original_value, new_value])
 			if not has_updated and original_value != new_value:
 				has_updated = true
 		object_snapshot.set_auth(snapshot.is_auth(subject))
+		_logger.debug("Final snapshot: %s", [object_snapshot])
 		match history:
 			_rb_input_history: _logger.debug("Merged input @%d: %s", [tick, object_snapshot])
 
