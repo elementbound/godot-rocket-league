@@ -318,7 +318,8 @@ func _ready():
 	NetworkSynchronizationServer.on_state.connect(func(snapshot: Snapshot):
 		if snapshot.is_empty():
 			return
-		if _latest_state < 0 or snapshot.tick > _latest_state:
+		if _latest_state < 0 or snapshot.tick < _latest_state:
+			# TODO: Actually, by 'latest' state, track earliest tick and resim from there
 			_logger.trace("Ingested state @%d, latest @%d->@%d", [snapshot.tick, _latest_state, snapshot.tick])
 			_latest_state = snapshot.tick
 		else:

@@ -55,14 +55,14 @@ func record_input(tick: int) -> void:
 
 func record_state(tick: int) -> void:
 	var input_snapshot := get_rollback_input_snapshot(tick - 1)
-	_record(tick, _rb_state_snapshots, _rb_state_properties, true, func(subject: Node):
+	_record(tick, _rb_state_snapshots, _rb_state_properties, false, func(subject: Node):
 		if not subject.is_multiplayer_authority():
 			return false
 		if RollbackSimulationServer.is_predicting(input_snapshot, subject):
 			return false
 		return true
 	)
-	_record_history(tick, _rb_state_history, _rb_state_properties, true, func(subject: Node):
+	_record_history(tick, _rb_state_history, _rb_state_properties, false, func(subject: Node):
 		if not subject.is_multiplayer_authority():
 			return false
 		if RollbackSimulationServer.is_predicting(input_snapshot, subject):
