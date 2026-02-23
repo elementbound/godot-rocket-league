@@ -25,11 +25,12 @@ func _ready():
 func is_confirmed_tick(tick: int) -> bool:
 	var players = get_tree().get_nodes_in_group("players")
 	for player in players:
-		if tick > NetworkRollback.get_latest_input_tick(player):
+		var player_latest_input := NetworkRollback.get_latest_input_tick(player)
+		if player_latest_input >= 0 and tick > player_latest_input:
 			return false
 	return true
 
-		
+
 func _physics_rollback_tick(_delta: float, tick: int) -> void:
 	if tick == reset_tick:
 		reset()
@@ -65,4 +66,4 @@ func reset() -> void:
 	announced_goal = false
 	direct_state.transform.origin = STARTING_POSITION
 	direct_state.linear_velocity = Vector3.ZERO
-	direct_state.angular_velocity = Vector3.ZERO 
+	direct_state.angular_velocity = Vector3.ZERO

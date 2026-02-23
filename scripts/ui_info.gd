@@ -25,17 +25,23 @@ func _tick(_delta: float, _t: int):
 	var type = "Server"
 	if not multiplayer.is_server():
 		type = "Client"
-		
+
 	text = "%s - %s" % [type, multiplayer.get_unique_id()]
 	text += "\nFPS: %s " % perf("fps")
 	text += "\ntick: %s " % NetworkTime.tick
-	
+
+	var players := get_tree().get_nodes_in_group("players")
+	text += "\n---\nLatest input ticks:"
+	for player in players:
+		text += "\n\t%s: %d" % [player.name, NetworkRollback.get_latest_input_tick(player)]
+	text += "\n---"
+
 	if not multiplayer.is_server():
 		# Grab latency to server and display
 		var enet = multiplayer.multiplayer_peer as ENetMultiplayerPeer
 		if enet == null:
 			return
-			
+
 		var server = enet.get_peer(1)
 		var _mean_rtt = server.get_statistic(ENetPacketPeer.PEER_ROUND_TRIP_TIME)
 

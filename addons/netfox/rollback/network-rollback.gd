@@ -278,12 +278,8 @@ func register_input_submission(_node: Node, _tick: int) -> void:
 func get_latest_input_tick(node: Node) -> int:
 	var input_nodes := RollbackSimulationServer.get_inputs_of(node)
 	var reference_tick := NetworkTime.tick
-	var input_age := NetworkHistoryServer.get_input_age_for(input_nodes, reference_tick)
 
-	if input_age >= 0:
-		return reference_tick - input_age
-	else:
-		return -1
+	return NetworkHistoryServer.get_latest_input_for(input_nodes, reference_tick)
 
 ## Check if a node has submitted input for a specific tick (or later)
 func has_input_for_tick(node: Node, tick: int) -> bool:

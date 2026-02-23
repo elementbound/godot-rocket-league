@@ -59,6 +59,16 @@ func get_latest_snapshot(tick: int, subject: Object) -> ObjectSnapshot:
 
 	return history.get_latest_at(tick) as ObjectSnapshot
 
+func get_latest_tick(tick: int, subject: Object) -> int:
+	if not _data.has(subject):
+		return -1
+
+	var history := _data[subject] as _HistoryBuffer
+	if not history.has_latest_at(tick):
+		return -1
+
+	return history.get_latest_index_at(tick)
+
 func set_property(tick: int, subject: Object, property: NodePath, value: Variant) -> void:
 	if not _data.has(subject):
 		_data[subject] = _HistoryBuffer.new(_history_size)

@@ -117,6 +117,9 @@ func merge_synchronizer_state(snapshot: Snapshot) -> bool:
 func get_input_age_for(subjects: Array, tick: int) -> int:
 	return _get_age_for(subjects, tick, _rb_input_snapshots)
 
+func get_latest_input_for(subjects: Array, tick: int) -> int:
+	return _get_latest_for(subjects, tick, _rb_input_history)
+
 func get_state_age_for(subjects: Array, tick: int) -> int:
 	return _get_age_for(subjects, tick, _rb_state_snapshots)
 
@@ -279,6 +282,7 @@ func _merge(snapshot: Snapshot, snapshots: _HistoryBuffer, reverse: bool = false
 func _get_age_for(subjects: Array, tick: int, snapshots: _HistoryBuffer) -> int:
 	var at := tick
 
+	# TODO: Rewrite, we now have per-object history
 	# Bounded while loop
 	for i in range(1024):
 		if not snapshots.has_latest_at(at):
@@ -290,3 +294,18 @@ func _get_age_for(subjects: Array, tick: int, snapshots: _HistoryBuffer) -> int:
 			return tick - at
 
 	return -1
+
+func _get_latest_for(subjects: Array, tick: int, history: _PerObjectHistory) -> int:
+	var latest := -1
+
+	for subject in subjects:
+		var subject_latest := history.get_latest_tick(tick, subject)
+		if subject_latest < 0:
+			continue
+
+		if latest < 0:
+			latest = subject_latest
+		else:
+			latest = mini(latest, subject_latest)
+
+	return latest
