@@ -15,6 +15,8 @@ var reset_tick : int = 0
 var goal_team: int = 0
 
 
+var _logger := NetfoxLogger.new("rocket", "Ball")
+
 func _ready():
 	set_multiplayer_authority(1, true)
 	contact_monitor = true
@@ -27,6 +29,7 @@ func is_confirmed_tick(tick: int) -> bool:
 	for player in players:
 		var player_latest_input := NetworkRollback.get_latest_input_tick(player)
 		if player_latest_input >= 0 and tick > player_latest_input:
+			_logger.info("Tick @%d is not confirmed by #%s, latest is @%d", [tick, player, player_latest_input])
 			return false
 	return true
 
@@ -37,15 +40,18 @@ func _physics_rollback_tick(_delta: float, tick: int) -> void:
 		return
 
 func entered_goal_area(area: Area3D, tick: int) -> void:
+	if entered_goal: return
 	entered_goal = true
 	entered_goal_tick = tick
 	goal_team = int(area.name.right(1))
+	_logger.info("Entered goal area @%d", [entered_goal_tick])
 
 func on_tick(_delta: float, tick: int) -> void:
 
 	if entered_goal and not announced_goal:
 		# Check that no player actions can alter the outcome
 		if is_confirmed_tick(entered_goal_tick):
+			_logger.info("Time to announce goal")
 
 			goal_scored.emit(goal_team)
 			entered_goal = false
@@ -58,6 +64,8 @@ func on_tick(_delta: float, tick: int) -> void:
 			hide()
 
 			reset_tick = tick + NetworkTime.seconds_to_ticks(5.)
+		else:
+			_logger.info("Can't announce goal")
 
 
 func reset() -> void:

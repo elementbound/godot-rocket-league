@@ -87,6 +87,7 @@ extras/borderless=true
 extras/screen=1
 rollback/enable_diff_states=false
 state_synchronizer/enable_diff_states=false
+logging/log_level=3
 
 [physics]
 
