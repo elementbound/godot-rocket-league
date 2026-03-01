@@ -34,6 +34,8 @@ var team_colors = [Color.RED, Color.BLUE]
 
 var game: Game
 
+@onready var _logger := NetfoxLogger.new("rocket", self.name)
+
 func _ready():
 	print(multiplayer.get_unique_id(), " - created ", name, " ready")
 	global_position = Vector3(randi_range(-8, 8), 5, randi_range(-8, 8))
@@ -84,6 +86,7 @@ func _physics_rollback_tick(delta, _tick):
 	sleeping = false
 
 	if game.kicking_off:
+		_logger.info("Kickoff!")
 		take_kickoff_position()
 		return
 

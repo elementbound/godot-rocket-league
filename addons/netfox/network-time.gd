@@ -557,7 +557,7 @@ func _loop() -> void:
 	while _next_tick_time < _last_process_time and ticks_in_loop < max_ticks_per_frame:
 		if ticks_in_loop == 0:
 			before_tick_loop.emit()
-			NetworkHistoryServer.restore_synchronizer_state(tick)
+			#NetworkHistoryServer.restore_synchronizer_state(tick)
 
 		before_tick.emit(ticktime, tick)
 

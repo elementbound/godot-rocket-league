@@ -13,6 +13,8 @@ var scores = [0, 0]
 @onready var ball =  $"../Ball"
 @onready var markers = $"../Markers"
 
+var _logger := NetfoxLogger.new("rocket", "Game")
+
 func _ready() -> void:
 	ball.goal_scored.connect(on_goal_scored)
 	NetworkTime.after_tick_loop.connect(update_scoreboard)
@@ -26,8 +28,12 @@ func on_goal_scored(team: int) -> void:
 	queue_kickoff()
 
 func on_tick(_delta: float, tick: int) -> void:
+	if kicking_off:
+		_logger.info("Kickoff active!")
+
 	if kicking_off and tick >= kickoff_tick:
 		kicking_off = false
+		_logger.info("Kickoff expired @%d", [kickoff_tick])
 
 func update_scoreboard() -> void:
 
@@ -41,7 +47,10 @@ func queue_kickoff() -> void:
 	if not multiplayer.is_server():
 		return
 
+	_logger.info("Queuing kickoff in 3 seconds!")
 	await get_tree().create_timer(3.0).timeout
+
+	_logger.info("Kickoff set!")
 	kicking_off = true
 	kickoff_tick = NetworkTime.tick + NetworkTime.seconds_to_ticks(3.5)
 	assign_kickoff_positions()
