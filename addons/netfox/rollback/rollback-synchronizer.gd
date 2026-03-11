@@ -32,23 +32,11 @@ class_name RollbackSynchronizer
 ## for every tick.
 ## [br][br]
 ## Only considered if [member _NetworkRollback.enable_diff_states] is true.
+## @deprecated: This can now be configured in the project settings.
 @export_range(0, 128, 1, "or_greater")
 var full_state_interval: int = 24
 
-## Ticks to wait between unreliably acknowledging diff states.
-## [br][br]
-## This can reduce the amount of properties sent in diff states, due to clients
-## more often acknowledging received states. To avoid introducing hickups, these
-## are sent unreliably.
-## [br][br]
-## If set to 0, diff states will never be acknowledged. If set to 1, all diff
-## states will be acknowledged. If set higher, ack's will be sent regularly, but
-## not for every diff state.
-## [br][br]
-## If enabled, it's worth to tune this setting until network traffic is actually
-## reduced.
-## [br][br]
-## Only considered if [member _NetworkRollback.enable_diff_states] is true.
+## @deprecated: This is no longer used.
 @export_range(0, 128, 1, "or_greater")
 var diff_ack_interval: int = 0
 
@@ -62,6 +50,7 @@ var diff_ack_interval: int = 0
 ## This will broadcast input to all peers, turning this off will limit to
 ## sending it to the server only. Turning this off is recommended to save
 ## bandwidth and reduce cheating risks.
+## @deprecated: This can now be configured in the project settings.
 @export var enable_input_broadcast: bool = true
 
 # Make sure this exists from the get-go, just not in the scene tree
@@ -102,14 +91,14 @@ func process_settings() -> void:
 
 	# Register simulation callbacks
 	for node in nodes:
-		RollbackSimulationServer.register(node._rollback_tick)
+		RollbackSimulationServer.register(NetworkRollback._get_rollback_method(node))
 		_sim_nodes.append(node)
 
 	# Both simulated and state nodes depend on all inputs
 	# TODO(#564): Write tests for setups where a node is synchronized but not simulated
 	for node in nodes + _state_properties.get_subjects():
 		for input_node in _input_properties.get_subjects():
-			RollbackSimulationServer.register_input_for(node, input_node)
+			RollbackSimulationServer.register_rollback_input_for(node, input_node)
 
 	# Register identifiers
 	for node in _state_properties.get_subjects() + _input_properties.get_subjects():
@@ -128,13 +117,13 @@ func process_authority():
 	# Deregister all recorded properties
 	for node in _state_properties.get_subjects():
 		for property in _state_properties.get_properties_of(node):
-			NetworkHistoryServer.deregister_state(node, property)
-			NetworkSynchronizationServer.deregister_state(node, property)
+			NetworkHistoryServer.deregister_rollback_state(node, property)
+			NetworkSynchronizationServer.deregister_rollback_state(node, property)
 
 	for node in _input_properties.get_subjects():
 		for property in _input_properties.get_properties_of(node):
-			NetworkHistoryServer.deregister_input(node, property)
-			NetworkSynchronizationServer.deregister_input(node, property)
+			NetworkHistoryServer.deregister_rollback_input(node, property)
+			NetworkSynchronizationServer.deregister_rollback_input(node, property)
 
 	# Process authority
 	_state_properties.set_from_paths(root, state_properties)
@@ -143,13 +132,13 @@ func process_authority():
 	# Register new recorded properties
 	for node in _state_properties.get_subjects():
 		for property in _state_properties.get_properties_of(node):
-			NetworkHistoryServer.register_state(node, property)
-			NetworkSynchronizationServer.register_state(node, property)
+			NetworkHistoryServer.register_rollback_state(node, property)
+			NetworkSynchronizationServer.register_rollback_state(node, property)
 
 	for node in _input_properties.get_subjects():
 		for property in _input_properties.get_properties_of(node):
-			NetworkHistoryServer.register_input(node, property)
-			NetworkSynchronizationServer.register_input(node, property)
+			NetworkHistoryServer.register_rollback_input(node, property)
+			NetworkSynchronizationServer.register_rollback_input(node, property)
 
 ## Add a state property.
 ## [br][br]
@@ -263,7 +252,7 @@ func ignore_prediction(node: Node) -> void:
 ## [br][br]
 ## Returns -1 if there's no known input.
 func get_last_known_input() -> int:
-	return NetworkHistoryServer.get_input_age_for(_input_properties.get_subjects(), NetworkTime.tick)
+	return NetworkHistoryServer.get_latest_input_for(_input_properties.get_subjects(), NetworkTime.tick)
 
 ## Get the tick of the last known state.
 ## [br][br]

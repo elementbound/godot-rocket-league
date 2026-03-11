@@ -862,7 +862,7 @@ class _DictionarySerializer extends NetworkSchemaSerializer:
 
 class _NetworkIdentityReferenceSerializer extends NetworkSchemaSerializer:
 	static var varuint := _VaruintSerializer.new()
-	
+
 	func encode(v: Variant, b: StreamPeerBuffer) -> void:
 		var ref := v as _NetworkIdentityReference
 		if ref.has_id():
@@ -872,7 +872,7 @@ class _NetworkIdentityReferenceSerializer extends NetworkSchemaSerializer:
 			# TODO(#562): Get rid of Godot's prepended 32 bits of string length
 			# TODO(#562): Write is easy, prefer not manually iterating till \0 on read
 			b.put_utf8_string(ref.get_full_name())
-	
+
 	func decode(b: StreamPeerBuffer) -> Variant:
 		var id := varuint.decode(b) as int
 		if id == 0:
